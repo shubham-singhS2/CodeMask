@@ -2,6 +2,17 @@ import { useState, useCallback, useEffect } from 'react';
 import { sanitize, restore } from '../engine/sanitizer';
 import { TYPE_META } from '../engine/patterns';
 
+function generateId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 const INITIAL_COUNTERS = { ip: 0, key: 0, pass: 0 };
 const LS_REGISTRY_KEY = 'codemask_registry';
 const LS_COUNTERS_KEY = 'codemask_counters';
@@ -72,7 +83,7 @@ export function useRegistry() {
       : { ip: 'IP', key: 'API_KEY', pass: 'PASSWORD' }[type];
 
     const entry = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       placeholder: `{{${label}_${cnt[type]}}}`,
       realValue,
       type,
